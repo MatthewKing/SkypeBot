@@ -1,0 +1,20 @@
+# build
+bin/
+obj/
+debug/
+release/
+build/tools/
+publish/
+
+# nuget
+packages/
+
+# user-specific files
+*.suo
+*.user
+*.sln.docstates
+
+# ncrunch
+*.crunchsolution*
+*.ncrunchsolution*
+*.ncrunchproject*
