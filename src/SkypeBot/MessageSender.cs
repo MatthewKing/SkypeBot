@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using SKYPE4COMLib;
 
 namespace SkypeBot
@@ -19,7 +20,7 @@ namespace SkypeBot
             var chat = this.FindChat(target);
             if (chat != null)
             {
-                if (name != null)
+                if (!String.IsNullOrEmpty(name))
                 {
                     message = $"[{name}]: {message}";
                 }

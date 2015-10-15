@@ -10,6 +10,11 @@ namespace SkypeBot
     {
         public static IEnumerable<IMessageHandler> CompileHandlers(params string[] paths)
         {
+            return CompileHandlers(paths as IEnumerable<string>);
+        }
+
+        public static IEnumerable<IMessageHandler> CompileHandlers(IEnumerable<string> paths)
+        {
             var provider = new CSharpCodeProvider(new Dictionary<string, string>()
             {
                 ["CompilerVersion"] = "v4.0"
@@ -22,7 +27,7 @@ namespace SkypeBot
 
             var handlers = new List<IMessageHandler>();
 
-            var results = provider.CompileAssemblyFromFile(options, paths);
+            var results = provider.CompileAssemblyFromFile(options, paths.ToArray());
             if (results.Errors.Count == 0)
             {
                 var assembly = results.CompiledAssembly;
