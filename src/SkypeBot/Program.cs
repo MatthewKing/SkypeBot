@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using Newtonsoft.Json;
+using Serilog;
 using Skype = SKYPE4COMLib.Skype;
 
 namespace SkypeBot
@@ -30,6 +31,10 @@ namespace SkypeBot
 
         public static void Main(string[] args)
         {
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.ColoredConsole(outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss}]: {Message}{NewLine}{Exception}")
+                .CreateLogger();
+
             var config = GetConfig();
 
             var skype = new Skype();

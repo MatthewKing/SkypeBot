@@ -1,8 +1,10 @@
 ﻿using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Microsoft.CSharp;
+using Serilog;
 
 namespace SkypeBot
 {
@@ -34,11 +36,15 @@ namespace SkypeBot
                 foreach (var handlerType in assembly.GetTypes().Where(t => !t.IsInterface && typeof(IMessageHandler).IsAssignableFrom(t)))
                 {
                     handlers.Add((IMessageHandler)Activator.CreateInstance(handlerType));
+                    Log.Information("Initializing handler {HandlerType}", handlerType.Name);
                 }
             }
             else
             {
-                var err = results.Errors.OfType<CompilerError>().ToArray();
+                foreach (var err in results.Errors.OfType<CompilerError>())
+                {
+                    Log.Error("{FileName} line {LineNumber}: {ErrorMessage:l}", Path.GetFileName(err.FileName), err.Line, err.ErrorText);
+                }
             }
 
             return handlers;
