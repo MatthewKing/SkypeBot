@@ -35,6 +35,9 @@ namespace SkypeBot
                 .WriteTo.ColoredConsole(outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss}]: {Message}{NewLine}{Exception}")
                 .CreateLogger();
 
+            var exitEvent = new ManualResetEvent(false);
+            Console.CancelKeyPress += (s, e) => exitEvent.Set();
+
             var config = GetConfig();
 
             var skype = new Skype();
@@ -49,7 +52,8 @@ namespace SkypeBot
 
             var timer = new Timer(Tick, context, 0, 3000);
 
-            Console.ReadLine();
+            Console.WriteLine("SkypeBot is running. Press CTRL+C to exit.");
+            exitEvent.WaitOne();
         }
 
         private static void Tick(object state)
