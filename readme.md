@@ -40,6 +40,8 @@ public class GreetingHandler : IMessageHandler
 }
 ```
 
+Additional examples are available in the [samples folder](samples).
+
 Additional information
 ----------------------
 
