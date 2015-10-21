@@ -26,6 +26,10 @@ namespace SkypeBot
             options.GenerateExecutable = false;
             options.GenerateInMemory = true;
             options.ReferencedAssemblies.Add("SkypeBot.exe");
+            options.ReferencedAssemblies.Add("System.dll");
+            options.ReferencedAssemblies.Add("System.Core.dll");
+            options.ReferencedAssemblies.Add("System.Runtime.dll");
+            options.ReferencedAssemblies.Add("Serilog.dll");
 
             var handlers = new List<IMessageHandler>();
 
