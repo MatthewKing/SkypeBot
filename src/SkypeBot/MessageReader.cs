@@ -41,7 +41,7 @@ namespace SkypeBot
 
         private IEnumerable<Message> GetMessages(int startingMessageId)
         {
-            var sql = "select datetime([timestamp], 'unixepoch', 'utc') as [Timestamp], [chatname] as [ChatName], [author] as [Sender], [from_dispname] as [SenderDisplayName], [body_xml] as [Text] from [Messages] where [id] > @StartingMessageId;";
+            var sql = "select datetime([timestamp], 'unixepoch') as [Timestamp], [chatname] as [ChatName], [author] as [Sender], [from_dispname] as [SenderDisplayName], [body_xml] as [Text] from [Messages] where [id] > @StartingMessageId;";
             var param = new
             {
                 StartingMessageId = startingMessageId,
