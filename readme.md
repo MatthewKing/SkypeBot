@@ -49,6 +49,8 @@ SkypeBot uses the Skype4COM library to send messages. As a result, Skype must be
 
 SkypeBot does NOT use the Skype4COM library to receive messages. While Skype4COM seems like the obvious way to receive messages, it is unfortunately unreliable, and often loses messages. To work around this, SkypeBot instead scans Skype's SQLite database to find any new messages.
 
+The Skype4COM library only works with old-style p2p group chats, not the new-style cloud chats. To create an old-style p2p group chat, use the `/createmoderatedchat` slash-command from within Skype.
+
 Copyright
 ---------
 
