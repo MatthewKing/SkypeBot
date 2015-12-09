@@ -64,6 +64,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extensions.cs" />
     <Compile Include="MessageHandlerCompiler.cs" />
     <Compile Include="IMessageHandler.cs" />
     <Compile Include="Program.cs" />
