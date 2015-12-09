@@ -1,9 +1,10 @@
 ﻿using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.CSharp;
+using System.Reflection;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Serilog;
 
 namespace SkypeBot
@@ -17,37 +18,50 @@ namespace SkypeBot
 
         public static IEnumerable<IMessageHandler> CompileHandlers(IEnumerable<string> paths)
         {
-            var provider = new CSharpCodeProvider(new Dictionary<string, string>()
-            {
-                ["CompilerVersion"] = "v4.0"
-            });
-
-            var options = new CompilerParameters();
-            options.GenerateExecutable = false;
-            options.GenerateInMemory = true;
-            options.ReferencedAssemblies.Add("SkypeBot.exe");
-            options.ReferencedAssemblies.Add("System.dll");
-            options.ReferencedAssemblies.Add("System.Core.dll");
-            options.ReferencedAssemblies.Add("System.Runtime.dll");
-            options.ReferencedAssemblies.Add("Serilog.dll");
-
             var handlers = new List<IMessageHandler>();
 
-            var results = provider.CompileAssemblyFromFile(options, paths.ToArray());
-            if (results.Errors.Count == 0)
+            var assemblyName = "SkypeBot.Handlers";
+
+            var syntaxTrees = paths
+                .Select(path => File.ReadAllText(path))
+                .Select(contents => CSharpSyntaxTree.ParseText(contents))
+                .ToArray();
+
+            var dotNetAssemblyPath = Path.GetDirectoryName(typeof(object).Assembly.Location);
+            var references = new MetadataReference[]
             {
-                var assembly = results.CompiledAssembly;
-                foreach (var handlerType in assembly.GetTypes().Where(t => !t.IsInterface && typeof(IMessageHandler).IsAssignableFrom(t)))
+                MetadataReference.CreateFromFile(Path.Combine(dotNetAssemblyPath, "mscorlib.dll")),
+                MetadataReference.CreateFromFile(Path.Combine(dotNetAssemblyPath, "System.dll")),
+                MetadataReference.CreateFromFile(Path.Combine(dotNetAssemblyPath, "System.Core.dll")),
+                MetadataReference.CreateFromFile(Path.Combine(dotNetAssemblyPath, "System.Runtime.dll")),
+                MetadataReference.CreateFromFile(typeof(Program).Assembly.Location), // SkypeBot
+                MetadataReference.CreateFromFile(typeof(ILogger).Assembly.Location), // Serilog
+            };
+
+            var options = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary);
+
+            var compilation = CSharpCompilation.Create(assemblyName, syntaxTrees, references, options);
+
+            using (var ms = new MemoryStream())
+            {
+                var result = compilation.Emit(ms);
+                if (result.Success)
                 {
-                    handlers.Add((IMessageHandler)Activator.CreateInstance(handlerType));
-                    Log.Information("Initializing handler {HandlerType}", handlerType.Name);
+                    var assembly = Assembly.Load(ms.ToArray());
+                    foreach (var handlerType in assembly.GetTypes().Where(t => !t.IsInterface && typeof(IMessageHandler).IsAssignableFrom(t)))
+                    {
+                        handlers.Add((IMessageHandler)Activator.CreateInstance(handlerType));
+                        Log.Information("Initializing handler {HandlerType}", handlerType.Name);
+                    }
                 }
-            }
-            else
-            {
-                foreach (var err in results.Errors.OfType<CompilerError>())
+                else
                 {
-                    Log.Error("{FileName} line {LineNumber}: {ErrorMessage:l}", Path.GetFileName(err.FileName), err.Line, err.ErrorText);
+                    foreach (var error in result.Diagnostics)
+                    {
+                        var message = error.GetMessage();
+                        var span = error.Location.GetLineSpan();
+                        Log.Error("{FileName} line {LineNumber}: {ErrorMessage:l}", span.Path, span.StartLinePosition.Line, message);
+                    }
                 }
             }
 
