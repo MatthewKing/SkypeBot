@@ -50,10 +50,11 @@ namespace SkypeBot
             context.Sender = new MessageSender(skype, config.BotName);
             context.Handlers = MessageHandlerCompiler.CompileHandlers(config.HandlerFiles).ToArray();
 
-            var timer = new Timer(Tick, context, 0, 3000);
-
-            Console.WriteLine("SkypeBot is running. Press CTRL+C to exit.");
-            exitEvent.WaitOne();
+            using (var timer = new Timer(Tick, context, 0, 3000))
+            {
+                Console.WriteLine("SkypeBot is running. Press CTRL+C to exit.");
+                exitEvent.WaitOne();
+            }
         }
 
         private static void Tick(object state)

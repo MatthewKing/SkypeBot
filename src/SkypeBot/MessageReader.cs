@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SQLite;
 using Dapper;
+using Serilog;
 
 namespace SkypeBot
 {
@@ -35,7 +37,15 @@ namespace SkypeBot
 
             using (var connection = this.database.GetConnection())
             {
-                return Convert.ToInt32(connection.ExecuteScalar(sql));
+                try
+                {
+                    return Convert.ToInt32(connection.ExecuteScalar(sql));
+                }
+                catch (SQLiteException ex)
+                {
+                    Log.Error(ex, "GetCurrentMessageId");
+                    throw;
+                }
             }
         }
 
@@ -49,7 +59,15 @@ namespace SkypeBot
 
             using (var connection = this.database.GetConnection())
             {
-                return connection.Query<Message>(sql, param);
+                try
+                {
+                    return connection.Query<Message>(sql, param);
+                }
+                catch (SQLiteException ex)
+                {
+                    Log.Error(ex, "GetMessages({StartingMessageId})", startingMessageId);
+                    throw;
+                }
             }
         }
     }
