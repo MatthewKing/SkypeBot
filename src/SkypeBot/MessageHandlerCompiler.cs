@@ -34,6 +34,8 @@ namespace SkypeBot
                 MetadataReference.CreateFromFile(Path.Combine(dotNetAssemblyPath, "System.dll")),
                 MetadataReference.CreateFromFile(Path.Combine(dotNetAssemblyPath, "System.Core.dll")),
                 MetadataReference.CreateFromFile(Path.Combine(dotNetAssemblyPath, "System.Runtime.dll")),
+                MetadataReference.CreateFromFile(Path.Combine(dotNetAssemblyPath, "System.Xml.dll")),
+                MetadataReference.CreateFromFile(Path.Combine(dotNetAssemblyPath, "System.Xml.Linq.dll")),
                 MetadataReference.CreateFromFile(typeof(Program).Assembly.Location), // SkypeBot
                 MetadataReference.CreateFromFile(typeof(ILogger).Assembly.Location), // Serilog
             };
